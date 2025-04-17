@@ -1,44 +1,44 @@
 # zGinv
 
-📦 **zGinv** — CLI-инструмент для централизованной инвентаризации и управления 
-VPS-серверами. Хранит данные в SQLite, 
-поддерживает фильтрацию, экспорт в Ansible, импорт из SSH-конфигов и работу с группами. Также доступен HTTP API сервер на Fiber v3.
+📦 **zGinv** is a CLI tool for centralized inventory and management of VPS servers.  
+It stores data in SQLite, supports filtering, export to Ansible, SSH config import, and group management.  
+Also includes an HTTP API server built with Fiber v3.
 
 ---
 
-## 🛠️ Возможности
+## 🛠️ Features
 
-- Добавление серверов вручную (`add`)
-- Импорт хостов из SSH-конфигов (`import-ssh`)
-- Просмотр серверов с фильтрами (`list`)
-- Поиск по имени, тегу, группе (`find`)
-- Редактирование серверов (`edit`)
-- Экспорт в форматы: `ansible`, `csv`, `json`, `yaml`
-- Поддержка динамического инвентаря (`inventory`)
-- Запуск Web API через `serve`
-- Документация через Swagger UI (`/swagger/index.html`)
-- Просмотр и анализ групп (`groups`)
+- Add servers manually (`add`)
+- Import hosts from SSH configs (`import-ssh`)
+- List servers with filters (`list`)
+- Search by name, tag, or group (`find`)
+- Edit server records (`edit`)
+- Export to formats: `ansible`, `csv`, `json`, `yaml`
+- Dynamic inventory support (`inventory`)
+- Launch Web API with `serve`
+- API documentation via Swagger UI (`/swagger/index.html`)
+- Group inspection and analysis (`groups`)
 
 ---
 
-## 📡 Запуск API-сервера
+## 📡 Running the API server
 
 ```bash
 zGinv serve
 ```
 
-### Параметры:
-- `--port`, `-p` — указать порт вручную
-- `ZGINV_PORT=9090` — задать порт через переменную окружения
+### Parameters:
+- `--port`, `-p` — specify port manually
+- `ZGINV_PORT=9090` — set port via environment variable
 
-Пример:
+Example:
 ```bash
 zGinv serve -p 7070
 ```
 
-API будет доступен на: `http://localhost:7070/api/`
+The API will be available at: `http://localhost:7070/api/`
 
-### 📘 Примеры HTTP-запросов:
+### 📘 Example HTTP requests:
 
 ```bash
 curl "http://localhost:8080/api/servers?group=base-dns&project=openbld"
@@ -58,50 +58,48 @@ curl http://localhost:8080/api/servers/export
 
 ---
 
-## 📚 Swagger / OpenAPI документация
+## 📚 Swagger / OpenAPI documentation
 
-Установка:
+Install Swagger CLI tools:
 ```bash
 go install github.com/swaggo/swag/cmd/swag@latest
 swag init
 ```
 
-Swagger UI будет доступен по адресу:
+Swagger UI will be available at:
 ```http
 http://localhost:8080/swagger/index.html
 ```
 
-Если ты используешь `swag init`, он сгенерирует файл `docs/swagger.json`.
+Swagger JSON spec (for Postman, etc.):
+```bash
+curl http://localhost:8080/swagger/doc.json
+```
 
-Примеры аннотаций в коде:
+Example annotations:
 ```go
-// @Summary Получить список серверов
+// @Summary Get list of servers
 // @Tags Servers
 // @Produce json
 // @Success 200 {array} db.Server
 // @Router /servers [get]
 ```
 
-Модель `Server` оформлена с `json`, `example`, `description`, `format`:
+Model `Server` is documented using `json`, `example`, `description`, `format`:
 ```go
 type Server struct {
-	Name string `json:"name" example:"dns-kz-1" description:"Имя сервера"`
-	... // и т.д.
+	Name string `json:"name" example:"dns-kz-1" description:"Server name"`
+	// ...
 }
 ```
 
-Direct call with `curl`:
-```bash
-curl http://localhost:8080/swagger/doc.json
-```
-
-Swagger UI использует [`github.com/Flussen/swagger-fiber-v3`](https://github.com/Flussen/swagger-fiber-v3) — поддержка Fiber v3.
+Swagger UI is powered by [`github.com/Flussen/swagger-fiber-v3`](https://github.com/Flussen/swagger-fiber-v3) — compatible with Fiber v3.
 
 ---
 
-## 📋 Примеры использования CLI
+## 📋 CLI Usage Examples
 
-### ✅ Добавление сервера вручную
+### ✅ Add a server manually
 ```bash
 zGinv add \
   --name dns-kz-1 \
@@ -110,10 +108,10 @@ zGinv add \
   --region kz \
   --tags dns,edge \
   --group base-dns \
-  --comment "Новый DNS сервер"
+  --comment "New DNS server"
 ```
 
-### ✏️ Редактирование существующего сервера
+### ✏️ Edit an existing server
 ```bash
 zGinv edit dns-kz-1 \
   --address 185.100.100.99 \
@@ -121,46 +119,46 @@ zGinv edit dns-kz-1 \
   --tags dns,edge,updated
 ```
 
-### 🔍 Поиск серверов
+### 🔍 Search servers
 ```bash
 zGinv find --name "dns-kz*"
 zGinv find --group base-dns
 zGinv find --tag edge
 ```
-→ Поддерживаются шаблоны `*` и фильтрация по группе или тегам.
+→ Supports `*` wildcard and filtering by group or tags.
 
-### 📥 Импорт из SSH-конфига
+### 📥 Import from SSH config
 ```bash
 zGinv import-ssh --file ~/path/to/ssh/configs/bld.conf
 ```
-→ Группа будет автоматически определена из имени файла (`bld`).
+→ Group name is derived automatically from the file name (`bld`).
 
-### 📄 Просмотр серверов
+### 📄 List servers
 ```bash
 zGinv list
 zGinv list --project openbld
 zGinv list --group base-dns
 ```
 
-### 📤 Экспорт в разные форматы
+### 📤 Export to different formats
 
-#### 🔹 Ansible INI формат:
+#### 🔹 Ansible INI format:
 ```bash
 zGinv export --format ansible > hosts.ini
 zGinv export --group base-dns --format ansible > core.ini
 ```
 
-#### 🔹 CSV формат:
+#### 🔹 CSV format:
 ```bash
 zGinv export --format csv > servers.csv
 ```
 
-#### 🔹 JSON формат:
+#### 🔹 JSON format:
 ```bash
 zGinv export --format json --group bld > bld.json
 ```
 
-#### 🔹 YAML (структура групп для Ansible)
+#### 🔹 YAML (Ansible-style group structure)
 ```bash
 zGinv export --format yaml > all-hosts.yml
 ```
@@ -178,22 +176,22 @@ all:
 
 ---
 
-### ⚡ Динамический инвентарь для Ansible
+### ⚡ Dynamic Ansible inventory
 
-Создай скрипт:
+Create a wrapper script:
 ```bash
 echo '#!/bin/bash
 zGinv inventory' > inventory.sh
 chmod +x inventory.sh
 ```
 
-В `ansible.cfg`:
+Set it in your `ansible.cfg`:
 ```ini
 [defaults]
 inventory = ./inventory.sh
 ```
 
-Теперь можешь:
+Now you can run:
 ```bash
 ansible all -m ping
 ansible-playbook site.yml
@@ -201,14 +199,14 @@ ansible-playbook site.yml
 
 ---
 
-### 🧭 Просмотр всех групп
+### 🧭 View all groups
 ```bash
 zGinv groups
 ```
-Выведет список групп и количество серверов в каждой.
+Displays a list of groups and the number of servers in each.
 
 ---
 
-## ⚖️ Лицензия
+## ⚖️ License
 
-CC0 License © 2025 [Евгений Гончаров](https://openbld.net)
+CC0 License © 2025 [Yvgeniy Goncharov](https://openbld.net)
