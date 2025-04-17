@@ -28,6 +28,8 @@ test.conf
 *.ini
 *.json
 *.yaml
+*.yml
+*.csv
 *.db
 
 # Stay in repo
