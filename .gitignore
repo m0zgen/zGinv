@@ -1,0 +1,34 @@
+# Ignore everything
+# IDE
+.idea
+.DS_Store
+.vscode
+
+# Profiling
+*.prof
+profiles
+
+# Build
+dist
+tools/builds/prev
+tools
+
+# Binaries and generated files
+zGinv
+zGinv.log
+
+# Tests
+users
+logs
+tmp
+new_*
+*download*
+test.conf
+
+*.ini
+*.json
+*.yaml
+*.db
+
+# Stay in repo
+!internal/*
